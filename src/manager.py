@@ -98,4 +98,25 @@ class Manager:
                 })
         return debtors
     
-    
+    def get_annual_report(self, year: int) -> dict:
+        total_costs = sum(bill.amount_pln for bill in self.bills if bill.settlement_year == year)
+        total_income = sum(transfer.amount_pln for transfer in self.transfers if transfer.settlement_year == year)
+        
+        by_month = {}
+        for month in range(1, 13):
+            month_costs = sum(b.amount_pln for b in self.bills if b.settlement_year == year and b.settlement_month == month)
+            month_income = sum(t.amount_pln for t in self.transfers if t.settlement_year == year and t.settlement_month == month)
+            
+            by_month[month] = {
+                "costs": month_costs,
+                "income": month_income,
+                "balance": month_income - month_costs
+            }
+            
+        return {
+            "year": year,
+            "total_costs": total_costs,
+            "total_income": total_income,
+            "net_balance": total_income - total_costs,
+            "by_month": by_month
+        }
