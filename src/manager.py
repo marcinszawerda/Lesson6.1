@@ -71,4 +71,31 @@ class Manager:
             )
         for tenant in tenants_in_apartment ] 
     
+    def get_debtors(self, apartment_key: str, year: int, month: int) -> list[dict]:
+        if month < 1 or month > 12:
+            raise ValueError("Month must be between 1 and 12")
+        if apartment_key not in self.apartments:
+            return []
+            
+        tenants_in_apartment = [t for t in self.tenants.values() if t.apartment == apartment_key]
+        if not tenants_in_apartment:
+            return []
+            
+        debtors = []
+        for tenant in tenants_in_apartment:
+            tenant_transfers = sum(
+                t.amount_pln for t in self.transfers
+                if t.tenant == tenant.name 
+                and t.settlement_year == year 
+                and t.settlement_month == month
+            )
+            if tenant_transfers < tenant.rent_pln:
+                debtors.append({
+                    "tenant": tenant.name,
+                    "rent_due": tenant.rent_pln,
+                    "transfers_received": tenant_transfers,
+                    "debt": tenant.rent_pln - tenant_transfers
+                })
+        return debtors
+    
     
